@@ -70,7 +70,12 @@ export const slaHours: Record<string, number> = {
   low: 168,
 };
 
-export function slaState(job: { priority: string; due_at: string | null; completed_at: string | null; status: string }) {
+export function slaState(job: {
+  priority: string;
+  due_at: string | null;
+  completed_at: string | null;
+  status: string;
+}) {
   if (job.status === "completed") {
     if (!job.due_at || !job.completed_at) return { label: "Done", tone: "success" as const };
     const late = new Date(job.completed_at) > new Date(job.due_at);
@@ -78,12 +83,21 @@ export function slaState(job: { priority: string; due_at: string | null; complet
       ? { label: "Closed late", tone: "destructive" as const }
       : { label: "Closed in time", tone: "success" as const };
   }
-  if (job.status === "not_completed" || job.status === "cancelled") return { label: "—", tone: "muted" as const };
+  if (job.status === "not_completed" || job.status === "cancelled")
+    return { label: "—", tone: "muted" as const };
   if (!job.due_at) return { label: "No target", tone: "muted" as const };
   const msLeft = new Date(job.due_at).getTime() - Date.now();
-  if (msLeft < 0) return { label: `Overdue by ${duration(job.due_at)}`, tone: "destructive" as const };
-  if (msLeft < 3_600_000 * 4) return { label: `Due in ${duration(null, job.due_at) === "—" ? "" : ""}${duration(new Date().toISOString(), job.due_at)}`, tone: "warning" as const };
-  return { label: `Due in ${duration(new Date().toISOString(), job.due_at)}`, tone: "muted" as const };
+  if (msLeft < 0)
+    return { label: `Overdue by ${duration(job.due_at)}`, tone: "destructive" as const };
+  if (msLeft < 3_600_000 * 4)
+    return {
+      label: `Due in ${duration(null, job.due_at) === "—" ? "" : ""}${duration(new Date().toISOString(), job.due_at)}`,
+      tone: "warning" as const,
+    };
+  return {
+    label: `Due in ${duration(new Date().toISOString(), job.due_at)}`,
+    tone: "muted" as const,
+  };
 }
 
 export function defaultDueAt(priority: string, from = new Date()) {
@@ -91,7 +105,12 @@ export function defaultDueAt(priority: string, from = new Date()) {
   return new Date(from.getTime() + hours * 3_600_000).toISOString();
 }
 
-export async function logJobEvent(jobCardId: string, eventType: string, actor: string, message: string) {
+export async function logJobEvent(
+  jobCardId: string,
+  eventType: string,
+  actor: string,
+  message: string,
+) {
   await supabase.from("job_card_events").insert({
     job_card_id: jobCardId,
     event_type: eventType,
@@ -127,16 +146,25 @@ export async function setJobStatus(
   const { error } = await supabase.from("job_cards").update(patch).eq("id", job.id);
   if (error) throw new Error(error.message);
 
-  await logJobEvent(job.id, "status_changed", actor, extra?.note ?? `Job marked ${jobStatusLabel[status]}`);
+  await logJobEvent(
+    job.id,
+    "status_changed",
+    actor,
+    extra?.note ?? `Job marked ${jobStatusLabel[status]}`,
+  );
 
   // Keep the resident-facing complaint in sync so tracking stays truthful.
   if (job.complaint_id) {
     const complaintStatus =
-      status === "completed" ? "resolved"
-      : status === "in_progress" || status === "en_route" ? "in_progress"
-      : status === "accepted" || status === "assigned" ? "assigned"
-      : status === "not_completed" ? "on_hold"
-      : null;
+      status === "completed"
+        ? "resolved"
+        : status === "in_progress" || status === "en_route"
+          ? "in_progress"
+          : status === "accepted" || status === "assigned"
+            ? "assigned"
+            : status === "not_completed"
+              ? "on_hold"
+              : null;
     if (complaintStatus) {
       await supabase
         .from("complaints")

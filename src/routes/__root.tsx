@@ -79,7 +79,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Ngwathe Local Municipality — Service Delivery Portal" },
-      { name: "description", content: "Official AI-powered service delivery portal for Ngwathe Local Municipality. Report water, electricity, sewer, roads and other issues 24/7 and track your complaint in real time." },
+      {
+        name: "description",
+        content:
+          "Official AI-powered service delivery portal for Ngwathe Local Municipality. Report water, electricity, sewer, roads and other issues 24/7 and track your complaint in real time.",
+      },
       { name: "author", content: "Ngwathe Local Municipality" },
       { property: "og:title", content: "Ngwathe Local Municipality — Service Delivery Portal" },
       { property: "og:description", content: "Report and track municipal service issues 24/7." },
@@ -94,7 +98,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bricolage+Grotesque:wght@600;700;800&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bricolage+Grotesque:wght@600;700;800&display=swap",
+      },
     ],
   }),
   shellComponent: RootShell,

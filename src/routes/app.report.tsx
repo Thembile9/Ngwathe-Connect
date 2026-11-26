@@ -7,7 +7,6 @@ import { CheckCircle2, Crosshair, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { submitComplaint } from "@/lib/complaints.functions";
 
-
 const formQuery = {
   queryKey: ["app", "report", "form"],
   queryFn: async () => {
@@ -25,7 +24,11 @@ export const Route = createFileRoute("/app/report")({
     typeof search.category === "string" ? { category: search.category } : {},
   loader: ({ context }) => context.queryClient.ensureQueryData(formQuery),
   component: ReportPage,
-  errorComponent: ({ error }) => <div className="p-6 text-sm text-destructive">{error instanceof Error ? error.message : String(error)}</div>,
+  errorComponent: ({ error }) => (
+    <div className="p-6 text-sm text-destructive">
+      {error instanceof Error ? error.message : String(error)}
+    </div>
+  ),
   notFoundComponent: () => <div className="p-6 text-sm">Not found</div>,
 });
 
@@ -45,7 +48,11 @@ function ReportPage() {
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [locating, setLocating] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<{ reference: string; priority: string; assigned_department: string | null } | null>(null);
+  const [result, setResult] = useState<{
+    reference: string;
+    priority: string;
+    assigned_department: string | null;
+  } | null>(null);
 
   function useMyLocation() {
     if (!navigator.geolocation) return toast.error("Location is not available on this device");
@@ -102,15 +109,31 @@ function ReportPage() {
             {result.reference}
           </div>
           <dl className="mt-4 space-y-1 text-left text-xs">
-            <div className="flex justify-between"><dt className="text-muted-foreground">Priority</dt><dd className="font-semibold uppercase text-foreground">{result.priority}</dd></div>
-            <div className="flex justify-between"><dt className="text-muted-foreground">Routed to</dt><dd className="font-semibold text-foreground">{result.assigned_department ?? "Customer Care"}</dd></div>
+            <div className="flex justify-between">
+              <dt className="text-muted-foreground">Priority</dt>
+              <dd className="font-semibold uppercase text-foreground">{result.priority}</dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-muted-foreground">Routed to</dt>
+              <dd className="font-semibold text-foreground">
+                {result.assigned_department ?? "Customer Care"}
+              </dd>
+            </div>
           </dl>
         </div>
-        <Link to="/app/reports" className="block rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground">
+        <Link
+          to="/app/reports"
+          className="block rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground"
+        >
           Track my reports
         </Link>
         <button
-          onClick={() => { setResult(null); setDescription(""); setCoords(null); navigate({ to: "/app/report", search: {} }); }}
+          onClick={() => {
+            setResult(null);
+            setDescription("");
+            setCoords(null);
+            navigate({ to: "/app/report", search: {} });
+          }}
           className="block w-full rounded-xl border border-border bg-card px-4 py-3 text-center text-sm font-semibold text-foreground"
         >
           Report another fault
@@ -123,13 +146,24 @@ function ReportPage() {
     <form onSubmit={onSubmit} className="space-y-4 p-4">
       <header>
         <h1 className="font-display text-xl font-bold text-foreground">Report a fault</h1>
-        <p className="text-xs text-muted-foreground">The switchboard turns this into a job card for the responsible department.</p>
+        <p className="text-xs text-muted-foreground">
+          The switchboard turns this into a job card for the responsible department.
+        </p>
       </header>
 
       <Field label="What is the problem?">
-        <select value={category} onChange={(e) => setCategory(e.target.value)} required className={inputCls}>
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          required
+          className={inputCls}
+        >
           <option value="">Select a service</option>
-          {data.categories.map((c) => <option key={c.id} value={c.slug}>{c.name}</option>)}
+          {data.categories.map((c) => (
+            <option key={c.id} value={c.slug}>
+              {c.name}
+            </option>
+          ))}
         </select>
       </Field>
 
@@ -146,9 +180,22 @@ function ReportPage() {
       </Field>
 
       <Field label="Where is it?">
-        <input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Street address or nearest landmark" className={inputCls} />
-        <button type="button" onClick={useMyLocation} className="mt-2 inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs font-semibold text-foreground">
-          {locating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Crosshair className="h-3.5 w-3.5" />}
+        <input
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          placeholder="Street address or nearest landmark"
+          className={inputCls}
+        />
+        <button
+          type="button"
+          onClick={useMyLocation}
+          className="mt-2 inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs font-semibold text-foreground"
+        >
+          {locating ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Crosshair className="h-3.5 w-3.5" />
+          )}
           {coords ? "Location attached ✓" : "Use my current location"}
         </button>
       </Field>
@@ -157,25 +204,49 @@ function ReportPage() {
         <Field label="Ward">
           <select value={ward} onChange={(e) => setWard(e.target.value)} className={inputCls}>
             <option value="">Not sure</option>
-            {data.wards.map((w) => <option key={w.ward_number} value={w.ward_number}>Ward {w.ward_number}</option>)}
+            {data.wards.map((w) => (
+              <option key={w.ward_number} value={w.ward_number}>
+                Ward {w.ward_number}
+              </option>
+            ))}
           </select>
         </Field>
         <Field label="Town">
           <select value={town} onChange={(e) => setTown(e.target.value)} className={inputCls}>
             <option value="">Not sure</option>
-            {data.towns.map((t) => <option key={t.name} value={t.name}>{t.name}</option>)}
+            {data.towns.map((t) => (
+              <option key={t.name} value={t.name}>
+                {t.name}
+              </option>
+            ))}
           </select>
         </Field>
       </div>
 
       <Field label="Your name">
-        <input value={name} onChange={(e) => setName(e.target.value)} required className={inputCls} placeholder="Full name" />
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          className={inputCls}
+          placeholder="Full name"
+        />
       </Field>
       <Field label="Contact number">
-        <input value={phone} onChange={(e) => setPhone(e.target.value)} required type="tel" className={inputCls} placeholder="072 000 0000" />
+        <input
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          required
+          type="tel"
+          className={inputCls}
+          placeholder="072 000 0000"
+        />
       </Field>
 
-      <button disabled={busy} className="w-full rounded-xl bg-primary px-4 py-3.5 text-sm font-semibold text-primary-foreground disabled:opacity-60">
+      <button
+        disabled={busy}
+        className="w-full rounded-xl bg-primary px-4 py-3.5 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+      >
         {busy ? "Sending to the switchboard…" : "Submit report"}
       </button>
     </form>

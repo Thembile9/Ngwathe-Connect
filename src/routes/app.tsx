@@ -23,7 +23,10 @@ export const Route = createFileRoute("/app")({
           "The official Ngwathe Local Municipality community app. Report water, electricity, sewer and road faults from your phone and follow the job card until it is fixed.",
       },
       { property: "og:title", content: "Ngwathe Connect — Community App" },
-      { property: "og:description", content: "Report a fault and track the job card until it is fixed." },
+      {
+        property: "og:description",
+        content: "Report a fault and track the job card until it is fixed.",
+      },
       { property: "og:type", content: "website" },
     ],
   }),
@@ -45,7 +48,13 @@ function CommunityAppLayout() {
     <div className="mx-auto flex min-h-screen w-full max-w-md flex-col border-x border-border bg-background">
       <header className="sticky top-0 z-30 flex items-center justify-between gap-3 gradient-brand px-4 py-3 text-primary-foreground">
         <div className="flex items-center gap-2.5">
-          <img src={crest} alt="" width={34} height={34} className="rounded-md bg-white object-contain p-0.5" />
+          <img
+            src={crest}
+            alt=""
+            width={34}
+            height={34}
+            className="rounded-md bg-white object-contain p-0.5"
+          />
           <div className="leading-tight">
             <div className="text-sm font-semibold">Ngwathe Connect</div>
             <div className="text-[11px] text-primary-foreground/70">Community service app</div>

@@ -18,7 +18,11 @@ const appNoticesQuery = {
 export const Route = createFileRoute("/app/notices")({
   loader: ({ context }) => context.queryClient.ensureQueryData(appNoticesQuery),
   component: AppNotices,
-  errorComponent: ({ error }) => <div className="p-6 text-sm text-destructive">{error instanceof Error ? error.message : String(error)}</div>,
+  errorComponent: ({ error }) => (
+    <div className="p-6 text-sm text-destructive">
+      {error instanceof Error ? error.message : String(error)}
+    </div>
+  ),
   notFoundComponent: () => <div className="p-6 text-sm">Not found</div>,
 });
 
@@ -28,9 +32,13 @@ function AppNotices() {
     <div className="space-y-3 p-4">
       <header>
         <h1 className="font-display text-xl font-bold text-foreground">Municipal notices</h1>
-        <p className="text-xs text-muted-foreground">Planned interruptions, meetings and community alerts.</p>
+        <p className="text-xs text-muted-foreground">
+          Planned interruptions, meetings and community alerts.
+        </p>
       </header>
-      {data.length === 0 && <p className="py-8 text-center text-sm text-muted-foreground">No notices at this time.</p>}
+      {data.length === 0 && (
+        <p className="py-8 text-center text-sm text-muted-foreground">No notices at this time.</p>
+      )}
       {data.map((n) => (
         <article key={n.id} className="rounded-xl border border-border bg-card p-4 shadow-card">
           <div className="mb-1.5 inline-flex rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">

@@ -15,20 +15,40 @@ const switchboardQuery = {
     const [complaints, jobs, personnel] = await Promise.all([
       supabase
         .from("complaints")
-        .select("id, reference, description, ai_summary, priority, status, assigned_department, resident_name, resident_phone, street_address, latitude, longitude, ward_id, town_id, created_at, categories(name, color, department), wards(ward_number), towns(name)")
+        .select(
+          "id, reference, description, ai_summary, priority, status, assigned_department, resident_name, resident_phone, street_address, latitude, longitude, ward_id, town_id, created_at, categories(name, color, department), wards(ward_number), towns(name)",
+        )
         .order("created_at", { ascending: false })
         .limit(200),
-      supabase.from("job_cards").select("id, job_number, complaint_id, status, department, assigned_to, dispatched_at, created_at, personnel:assigned_to(full_name)").order("created_at", { ascending: false }).limit(200),
-      supabase.from("personnel").select("id, full_name, department, role, active").eq("active", true).order("full_name"),
+      supabase
+        .from("job_cards")
+        .select(
+          "id, job_number, complaint_id, status, department, assigned_to, dispatched_at, created_at, personnel:assigned_to(full_name)",
+        )
+        .order("created_at", { ascending: false })
+        .limit(200),
+      supabase
+        .from("personnel")
+        .select("id, full_name, department, role, active")
+        .eq("active", true)
+        .order("full_name"),
     ]);
-    return { complaints: complaints.data ?? [], jobs: jobs.data ?? [], personnel: personnel.data ?? [] };
+    return {
+      complaints: complaints.data ?? [],
+      jobs: jobs.data ?? [],
+      personnel: personnel.data ?? [],
+    };
   },
 };
 
 export const Route = createFileRoute("/admin/switchboard")({
   loader: ({ context }) => context.queryClient.ensureQueryData(switchboardQuery),
   component: Switchboard,
-  errorComponent: ({ error }) => <div className="p-8 text-destructive">{error instanceof Error ? error.message : String(error)}</div>,
+  errorComponent: ({ error }) => (
+    <div className="p-8 text-destructive">
+      {error instanceof Error ? error.message : String(error)}
+    </div>
+  ),
   notFoundComponent: () => <div className="p-8">Not found</div>,
 });
 
@@ -55,7 +75,8 @@ function Switchboard() {
             <Headset className="h-7 w-7 text-primary" /> Switchboard
           </h1>
           <p className="text-sm text-muted-foreground">
-            Every complaint that reaches the municipality lands here. Raise a job card and send it to the responsible team.
+            Every complaint that reaches the municipality lands here. Raise a job card and send it
+            to the responsible team.
           </p>
         </div>
         <div className="flex gap-3">
@@ -68,27 +89,46 @@ function Switchboard() {
         <div className="flex items-center gap-2 border-b border-border p-4">
           <Inbox className="h-4 w-4 text-warning-foreground" />
           <h2 className="font-semibold text-foreground">Awaiting dispatch</h2>
-          <span className="rounded-full bg-warning/20 px-2 py-0.5 text-xs font-semibold text-warning-foreground">{pending.length}</span>
+          <span className="rounded-full bg-warning/20 px-2 py-0.5 text-xs font-semibold text-warning-foreground">
+            {pending.length}
+          </span>
         </div>
         <div className="divide-y divide-border">
-          {pending.length === 0 && <p className="p-6 text-center text-sm text-muted-foreground">Every complaint has a job card. Well done.</p>}
+          {pending.length === 0 && (
+            <p className="p-6 text-center text-sm text-muted-foreground">
+              Every complaint has a job card. Well done.
+            </p>
+          )}
           {pending.map((c) => (
             <div key={c.id} className="flex flex-wrap items-start justify-between gap-3 p-4">
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-mono text-xs text-muted-foreground">{c.reference}</span>
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${priorityStyles[c.priority]}`}>{c.priority}</span>
-                  <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${statusStyles[c.status]}`}>{statusLabel(c.status)}</span>
-                  <span className="text-[11px] text-muted-foreground">waiting {duration(c.created_at)}</span>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${priorityStyles[c.priority]}`}
+                  >
+                    {c.priority}
+                  </span>
+                  <span
+                    className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${statusStyles[c.status]}`}
+                  >
+                    {statusLabel(c.status)}
+                  </span>
+                  <span className="text-[11px] text-muted-foreground">
+                    waiting {duration(c.created_at)}
+                  </span>
                 </div>
                 <div className="mt-1 text-sm font-semibold text-foreground">
                   {c.categories?.name ?? "Service request"}
                   {c.wards ? ` · Ward ${c.wards.ward_number}` : ""}
                   {c.towns ? ` · ${c.towns.name}` : ""}
                 </div>
-                <p className="mt-0.5 line-clamp-2 max-w-3xl text-xs text-muted-foreground">{c.ai_summary ?? c.description}</p>
+                <p className="mt-0.5 line-clamp-2 max-w-3xl text-xs text-muted-foreground">
+                  {c.ai_summary ?? c.description}
+                </p>
                 <div className="mt-1 text-[11px] text-muted-foreground">
-                  {c.resident_name} · {c.resident_phone}{c.street_address ? ` · ${c.street_address}` : ""}
+                  {c.resident_name} · {c.resident_phone}
+                  {c.street_address ? ` · ${c.street_address}` : ""}
                 </div>
               </div>
               <button
@@ -111,20 +151,36 @@ function Switchboard() {
           {dispatched.slice(0, 15).map((c) => {
             const job = jobByComplaint.get(c.id)!;
             return (
-              <Link key={c.id} to="/admin/jobs/$id" params={{ id: job.id }} className="flex flex-wrap items-center justify-between gap-3 p-4 hover:bg-accent">
+              <Link
+                key={c.id}
+                to="/admin/jobs/$id"
+                params={{ id: job.id }}
+                className="flex flex-wrap items-center justify-between gap-3 p-4 hover:bg-accent"
+              >
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-xs text-primary">{job.job_number}</span>
-                    <span className="font-mono text-[11px] text-muted-foreground">{c.reference}</span>
+                    <span className="font-mono text-[11px] text-muted-foreground">
+                      {c.reference}
+                    </span>
                   </div>
-                  <div className="mt-0.5 text-sm font-medium text-foreground">{c.categories?.name} · {job.department}</div>
+                  <div className="mt-0.5 text-sm font-medium text-foreground">
+                    {c.categories?.name} · {job.department}
+                  </div>
                   <div className="text-[11px] text-muted-foreground">
-                    {job.personnel?.full_name ?? "Unassigned"} · dispatched {job.dispatched_at ? formatDate(job.dispatched_at) : "—"}
+                    {job.personnel?.full_name ?? "Unassigned"} · dispatched{" "}
+                    {job.dispatched_at ? formatDate(job.dispatched_at) : "—"}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${jobStatusStyles[job.status]}`}>{jobStatusLabel[job.status]}</span>
-                  <span className="text-[11px] text-muted-foreground">{<TimeAgo value={job.created_at} />}</span>
+                  <span
+                    className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${jobStatusStyles[job.status]}`}
+                  >
+                    {jobStatusLabel[job.status]}
+                  </span>
+                  <span className="text-[11px] text-muted-foreground">
+                    {<TimeAgo value={job.created_at} />}
+                  </span>
                 </div>
               </Link>
             );
@@ -132,15 +188,33 @@ function Switchboard() {
         </div>
       </section>
 
-      {dispatching && <DispatchDialog complaint={dispatching} personnel={data.personnel} onClose={() => setDispatching(null)} />}
+      {dispatching && (
+        <DispatchDialog
+          complaint={dispatching}
+          personnel={data.personnel}
+          onClose={() => setDispatching(null)}
+        />
+      )}
     </div>
   );
 }
 
-function Metric({ label, value, tone }: { label: string; value: number; tone: "primary" | "warning" }) {
+function Metric({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: number;
+  tone: "primary" | "warning";
+}) {
   return (
     <div className="rounded-lg border border-border bg-card px-4 py-2 text-center shadow-card">
-      <div className={`text-2xl font-bold ${tone === "warning" ? "text-warning-foreground" : "text-primary"}`}>{value}</div>
+      <div
+        className={`text-2xl font-bold ${tone === "warning" ? "text-warning-foreground" : "text-primary"}`}
+      >
+        {value}
+      </div>
       <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</div>
     </div>
   );
@@ -164,11 +238,16 @@ function DispatchDialog({
   );
 
   const [department, setDepartment] = useState(
-    departments.find((d) => d === complaint.assigned_department) ?? complaint.categories?.department ?? departments[0] ?? "",
+    departments.find((d) => d === complaint.assigned_department) ??
+      complaint.categories?.department ??
+      departments[0] ??
+      "",
   );
   const [assignedTo, setAssignedTo] = useState("");
   const [priority, setPriority] = useState(complaint.priority);
-  const [title, setTitle] = useState(`${complaint.categories?.name ?? "Service fault"} — ${complaint.street_address ?? complaint.towns?.name ?? "Ngwathe"}`);
+  const [title, setTitle] = useState(
+    `${complaint.categories?.name ?? "Service fault"} — ${complaint.street_address ?? complaint.towns?.name ?? "Ngwathe"}`,
+  );
   const [work, setWork] = useState(complaint.ai_summary ?? complaint.description);
   const [dueAt, setDueAt] = useState(() => defaultDueAt(complaint.priority).slice(0, 16));
   const [busy, setBusy] = useState(false);
@@ -243,56 +322,132 @@ function DispatchDialog({
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-foreground/40 p-4 backdrop-blur-sm">
-      <form onSubmit={dispatch} className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-border bg-card p-5 shadow-card-lg">
+      <form
+        onSubmit={dispatch}
+        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-border bg-card p-5 shadow-card-lg"
+      >
         <div className="mb-4 flex items-start justify-between">
           <div>
             <h2 className="font-display text-lg font-bold text-foreground">Raise job card</h2>
             <p className="text-xs text-muted-foreground">From complaint {complaint.reference}</p>
           </div>
-          <button type="button" onClick={onClose} className="rounded-md p-1 text-muted-foreground hover:bg-accent"><X className="h-4 w-4" /></button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md p-1 text-muted-foreground hover:bg-accent"
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
 
         <div className="space-y-3">
           <L label="Job title">
-            <input value={title} onChange={(e) => setTitle(e.target.value)} required className={inp} />
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+              className={inp}
+            />
           </L>
           <L label="Work to be done">
-            <textarea value={work} onChange={(e) => setWork(e.target.value)} required rows={3} className={inp} />
+            <textarea
+              value={work}
+              onChange={(e) => setWork(e.target.value)}
+              required
+              rows={3}
+              className={inp}
+            />
           </L>
           <div className="grid grid-cols-2 gap-3">
             <L label="Department">
-              <select value={department} onChange={(e) => { setDepartment(e.target.value); setAssignedTo(""); }} className={inp}>
-                {departments.map((d) => <option key={d} value={d}>{d}</option>)}
+              <select
+                value={department}
+                onChange={(e) => {
+                  setDepartment(e.target.value);
+                  setAssignedTo("");
+                }}
+                className={inp}
+              >
+                {departments.map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
               </select>
             </L>
             <L label="Assign to">
-              <select value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)} className={inp}>
+              <select
+                value={assignedTo}
+                onChange={(e) => setAssignedTo(e.target.value)}
+                className={inp}
+              >
                 <option value="">Leave for supervisor</option>
-                {options.map((p) => <option key={p.id} value={p.id}>{p.full_name} ({p.role})</option>)}
+                {options.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.full_name} ({p.role})
+                  </option>
+                ))}
               </select>
             </L>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <L label="Priority">
-              <select value={priority} onChange={(e) => { const p = e.target.value as typeof priority; setPriority(p); setDueAt(defaultDueAt(p).slice(0, 16)); }} className={inp}>
-                {["critical", "high", "medium", "low"].map((p) => <option key={p} value={p}>{p}</option>)}
+              <select
+                value={priority}
+                onChange={(e) => {
+                  const p = e.target.value as typeof priority;
+                  setPriority(p);
+                  setDueAt(defaultDueAt(p).slice(0, 16));
+                }}
+                className={inp}
+              >
+                {["critical", "high", "medium", "low"].map((p) => (
+                  <option key={p} value={p}>
+                    {p}
+                  </option>
+                ))}
               </select>
             </L>
             <L label="Target completion">
-              <input type="datetime-local" value={dueAt} onChange={(e) => setDueAt(e.target.value)} required className={inp} />
+              <input
+                type="datetime-local"
+                value={dueAt}
+                onChange={(e) => setDueAt(e.target.value)}
+                required
+                className={inp}
+              />
             </L>
           </div>
 
           <div className="rounded-lg bg-secondary p-3 text-xs text-muted-foreground">
-            <div><strong className="text-foreground">Resident:</strong> {complaint.resident_name} · {complaint.resident_phone}</div>
-            <div><strong className="text-foreground">Location:</strong> {complaint.street_address ?? "—"} {complaint.wards ? `· Ward ${complaint.wards.ward_number}` : ""}</div>
-            <div><strong className="text-foreground">Received:</strong> {formatDate(complaint.created_at)} ({duration(complaint.created_at)} ago)</div>
+            <div>
+              <strong className="text-foreground">Resident:</strong> {complaint.resident_name} ·{" "}
+              {complaint.resident_phone}
+            </div>
+            <div>
+              <strong className="text-foreground">Location:</strong>{" "}
+              {complaint.street_address ?? "—"}{" "}
+              {complaint.wards ? `· Ward ${complaint.wards.ward_number}` : ""}
+            </div>
+            <div>
+              <strong className="text-foreground">Received:</strong>{" "}
+              {formatDate(complaint.created_at)} ({duration(complaint.created_at)} ago)
+            </div>
           </div>
         </div>
 
         <div className="mt-5 flex gap-2">
-          <button type="button" onClick={onClose} className="flex-1 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-semibold text-foreground">Cancel</button>
-          <button disabled={busy} className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-60">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-semibold text-foreground"
+          >
+            Cancel
+          </button>
+          <button
+            disabled={busy}
+            className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+          >
             {busy ? "Dispatching…" : "Dispatch job card"}
           </button>
         </div>
@@ -301,7 +456,8 @@ function DispatchDialog({
   );
 }
 
-const inp = "w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring";
+const inp =
+  "w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring";
 
 function L({ label, children }: { label: string; children: React.ReactNode }) {
   return (

@@ -58,10 +58,19 @@ export function useDemoUser() {
 export function useMyReports() {
   const { session } = useSession();
   const id = session?.user.id;
-  const { data } = useQuery({ queryKey: ["resident-references", id], enabled: !!id, queryFn: async () => {
-    const result = await supabase.from("complaints").select("reference").eq("resident_user_id", id!);
-    if (result.error) throw result.error;
-    return result.data.map(row => row.reference);
-  }, staleTime: 0, refetchOnMount: "always" });
+  const { data } = useQuery({
+    queryKey: ["resident-references", id],
+    enabled: !!id,
+    queryFn: async () => {
+      const result = await supabase
+        .from("complaints")
+        .select("reference")
+        .eq("resident_user_id", id!);
+      if (result.error) throw result.error;
+      return result.data.map((row) => row.reference);
+    },
+    staleTime: 0,
+    refetchOnMount: "always",
+  });
   return data ?? [];
 }

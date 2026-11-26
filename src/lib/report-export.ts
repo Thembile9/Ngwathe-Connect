@@ -19,7 +19,10 @@ function esc(v: unknown) {
 
 /** Builds an official, branded HTML report and opens the browser print/save-as-PDF dialog. */
 export function exportPdf(opts: ReportOptions) {
-  const generated = new Date().toLocaleString("en-ZA", { timeZone: "Africa/Johannesburg", hour12: false });
+  const generated = new Date().toLocaleString("en-ZA", {
+    timeZone: "Africa/Johannesburg",
+    hour12: false,
+  });
   const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8" />
 <title>${esc(opts.title)}</title>
@@ -75,7 +78,7 @@ export function exportPdf(opts: ReportOptions) {
     <span>Ngwathe Connect — official audit extract. Contains protected personal information (POPIA).</span>
     <span>${esc(generated)}</span>
   </footer>
-  <script>window.addEventListener("load", function () { setTimeout(function () { window.print(); }, 350); });<\/script>
+  <script>window.addEventListener("load", function () { setTimeout(function () { window.print(); }, 350); });</script>
 </body></html>`;
 
   const win = window.open("", "_blank", "width=1100,height=800");
@@ -89,12 +92,15 @@ export function exportPdf(opts: ReportOptions) {
 }
 
 /** Downloads the same dataset as a CSV file. */
-export function exportCsv(filename: string, columns: ReportColumn[], rows: Record<string, unknown>[]) {
-  const lines = [
-    columns.map((c) => c.label),
-    ...rows.map((r) => columns.map((c) => r[c.key])),
-  ];
-  const csv = lines.map((r) => r.map((v) => `"${String(v ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
+export function exportCsv(
+  filename: string,
+  columns: ReportColumn[],
+  rows: Record<string, unknown>[],
+) {
+  const lines = [columns.map((c) => c.label), ...rows.map((r) => columns.map((c) => r[c.key]))];
+  const csv = lines
+    .map((r) => r.map((v) => `"${String(v ?? "").replace(/"/g, '""')}"`).join(","))
+    .join("\n");
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" }));
   a.download = filename;

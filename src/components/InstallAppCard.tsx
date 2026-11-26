@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { Share, Plus, Smartphone } from "lucide-react";
 
-type InstallPromptEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> };
+type InstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: string }>;
+};
 
 /** Prompts residents to add the app to their home screen. */
 export function InstallAppCard() {
@@ -42,12 +45,15 @@ export function InstallAppCard() {
         </button>
       ) : isIos ? (
         <p className="mt-2.5 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
-          Tap <Share className="inline h-3.5 w-3.5" /> <strong className="text-foreground">Share</strong> then
-          <Plus className="inline h-3.5 w-3.5" /> <strong className="text-foreground">Add to Home Screen</strong>
+          Tap <Share className="inline h-3.5 w-3.5" />{" "}
+          <strong className="text-foreground">Share</strong> then
+          <Plus className="inline h-3.5 w-3.5" />{" "}
+          <strong className="text-foreground">Add to Home Screen</strong>
         </p>
       ) : (
         <p className="mt-2.5 text-xs text-muted-foreground">
-          Open your browser menu and choose <strong className="text-foreground">Add to Home screen</strong>.
+          Open your browser menu and choose{" "}
+          <strong className="text-foreground">Add to Home screen</strong>.
         </p>
       )}
     </section>

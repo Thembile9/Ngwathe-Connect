@@ -9,7 +9,11 @@ import { KeyRound, ShieldAlert } from "lucide-react";
 
 export const Route = createFileRoute("/admin/access")({
   component: AccessControl,
-  errorComponent: ({ error }) => <div className="p-8 text-destructive">{error instanceof Error ? error.message : String(error)}</div>,
+  errorComponent: ({ error }) => (
+    <div className="p-8 text-destructive">
+      {error instanceof Error ? error.message : String(error)}
+    </div>
+  ),
   notFoundComponent: () => <div className="p-8">Not found</div>,
 });
 
@@ -31,7 +35,9 @@ function AccessControl() {
   const { data: personnel = [] } = useQuery({
     queryKey: ["personnel", "all"],
     enabled: !!staff?.isAdmin,
-    queryFn: async () => (await supabase.from("personnel").select("id, full_name, department").order("full_name")).data ?? [],
+    queryFn: async () =>
+      (await supabase.from("personnel").select("id, full_name, department").order("full_name"))
+        .data ?? [],
   });
 
   const rolesMutation = useMutation({
@@ -59,7 +65,9 @@ function AccessControl() {
       <div className="mx-auto max-w-md p-10 text-center">
         <ShieldAlert className="mx-auto h-9 w-9 text-warning-foreground" />
         <h1 className="mt-3 font-display text-lg font-bold">Administrators only</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Role assignment is restricted to municipal system administrators.</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Role assignment is restricted to municipal system administrators.
+        </p>
       </div>
     );
   }
@@ -71,8 +79,8 @@ function AccessControl() {
           <KeyRound className="h-7 w-7 text-primary" /> Access control
         </h1>
         <p className="text-sm text-muted-foreground">
-          Grant roles and link staff accounts to personnel records. Technicians only see job cards assigned to them; supervisors
-          only see their own department.
+          Grant roles and link staff accounts to personnel records. Technicians only see job cards
+          assigned to them; supervisors only see their own department.
         </p>
       </header>
 
@@ -93,7 +101,9 @@ function AccessControl() {
                   <td className="px-4 py-3 align-top">
                     <div className="font-medium text-foreground">{a.full_name || "—"}</div>
                     <div className="text-xs text-muted-foreground">{a.email}</div>
-                    {a.department && <div className="text-xs text-muted-foreground">{a.department}</div>}
+                    {a.department && (
+                      <div className="text-xs text-muted-foreground">{a.department}</div>
+                    )}
                   </td>
                   <td className="px-4 py-3 align-top">
                     <div className="flex flex-wrap gap-2">
@@ -110,7 +120,9 @@ function AccessControl() {
                               })
                             }
                             className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold transition ${
-                              on ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:bg-accent"
+                              on
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border text-muted-foreground hover:bg-accent"
                             }`}
                           >
                             {roleLabel[r]}
@@ -118,17 +130,26 @@ function AccessControl() {
                         );
                       })}
                     </div>
-                    {current.length === 0 && <div className="mt-1 text-[11px] text-warning-foreground">No access</div>}
+                    {current.length === 0 && (
+                      <div className="mt-1 text-[11px] text-warning-foreground">No access</div>
+                    )}
                   </td>
                   <td className="px-4 py-3 align-top">
                     <select
                       value={a.personnel?.id ?? ""}
-                      onChange={(e) => linkMutation.mutate({ user_id: a.user_id, personnel_id: e.target.value || null })}
+                      onChange={(e) =>
+                        linkMutation.mutate({
+                          user_id: a.user_id,
+                          personnel_id: e.target.value || null,
+                        })
+                      }
                       className="rounded-md border border-input bg-background px-2 py-1.5 text-xs"
                     >
                       <option value="">Not linked</option>
                       {personnel.map((p) => (
-                        <option key={p.id} value={p.id}>{p.full_name} · {p.department}</option>
+                        <option key={p.id} value={p.id}>
+                          {p.full_name} · {p.department}
+                        </option>
                       ))}
                     </select>
                   </td>
@@ -136,7 +157,11 @@ function AccessControl() {
               );
             })}
             {!isLoading && accounts.length === 0 && (
-              <tr><td colSpan={3} className="p-8 text-center text-sm text-muted-foreground">No staff accounts yet.</td></tr>
+              <tr>
+                <td colSpan={3} className="p-8 text-center text-sm text-muted-foreground">
+                  No staff accounts yet.
+                </td>
+              </tr>
             )}
           </tbody>
         </table>

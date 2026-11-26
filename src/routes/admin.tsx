@@ -1,7 +1,17 @@
 import { createFileRoute, Link, Outlet, useLocation, redirect } from "@tanstack/react-router";
 import {
-  LayoutDashboard, ListChecks, Map, BarChart3, Megaphone, ArrowUpRight,
-  Headset, HardHat, Users, ScrollText, ShieldAlert, KeyRound,
+  LayoutDashboard,
+  ListChecks,
+  Map,
+  BarChart3,
+  Megaphone,
+  ArrowUpRight,
+  Headset,
+  HardHat,
+  Users,
+  ScrollText,
+  ShieldAlert,
+  KeyRound,
 } from "lucide-react";
 import crest from "@/assets/logo";
 import { StaffCard } from "@/components/StaffCard";
@@ -23,7 +33,10 @@ export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
       { title: "Municipal Switchboard — Ngwathe Connect" },
-      { name: "description", content: "Switchboard, job card dispatch and audit console for Ngwathe Local Municipality." },
+      {
+        name: "description",
+        content: "Switchboard, job card dispatch and audit console for Ngwathe Local Municipality.",
+      },
       { name: "robots", content: "noindex" },
       { property: "og:title", content: "Municipal Switchboard — Ngwathe Connect" },
       { property: "og:description", content: "Switchboard, job card dispatch and audit console." },
@@ -32,7 +45,11 @@ export const Route = createFileRoute("/admin")({
     ],
   }),
   component: AdminLayout,
-  errorComponent: ({ error }) => <div className="p-8 text-destructive">{error instanceof Error ? error.message : String(error)}</div>,
+  errorComponent: ({ error }) => (
+    <div className="p-8 text-destructive">
+      {error instanceof Error ? error.message : String(error)}
+    </div>
+  ),
   notFoundComponent: () => <div className="p-8">Not found</div>,
 });
 
@@ -73,7 +90,13 @@ function AdminLayout() {
     <div className="flex min-h-screen bg-background">
       <aside className="hidden w-64 shrink-0 flex-col bg-sidebar text-sidebar-foreground md:flex">
         <div className="flex items-center gap-3 border-b border-sidebar-border p-4">
-          <img src={crest} alt="" width={36} height={36} className="rounded-md bg-white object-contain p-0.5" />
+          <img
+            src={crest}
+            alt=""
+            width={36}
+            height={36}
+            className="rounded-md bg-white object-contain p-0.5"
+          />
           <div className="leading-tight">
             <div className="text-sm font-semibold">Ngwathe Admin</div>
             <div className="text-xs text-sidebar-foreground/60">Service Delivery</div>
@@ -87,7 +110,9 @@ function AdminLayout() {
                 key={n.to}
                 to={n.to}
                 className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition ${
-                  active ? "bg-sidebar-primary text-sidebar-primary-foreground" : "text-sidebar-foreground/85 hover:bg-sidebar-accent"
+                  active
+                    ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                    : "text-sidebar-foreground/85 hover:bg-sidebar-accent"
                 }`}
               >
                 <n.icon className="h-4 w-4" />
@@ -98,10 +123,16 @@ function AdminLayout() {
         </nav>
         <div className="space-y-2 border-t border-sidebar-border p-3">
           <StaffCard />
-          <Link to="/app" className="flex items-center gap-1 rounded-lg px-3 py-2 text-xs text-sidebar-foreground/70 hover:bg-sidebar-accent">
+          <Link
+            to="/app"
+            className="flex items-center gap-1 rounded-lg px-3 py-2 text-xs text-sidebar-foreground/70 hover:bg-sidebar-accent"
+          >
             Open community app <ArrowUpRight className="h-3 w-3" />
           </Link>
-          <Link to="/" className="flex items-center gap-1 rounded-lg px-3 py-2 text-xs text-sidebar-foreground/70 hover:bg-sidebar-accent">
+          <Link
+            to="/"
+            className="flex items-center gap-1 rounded-lg px-3 py-2 text-xs text-sidebar-foreground/70 hover:bg-sidebar-accent"
+          >
             View public site <ArrowUpRight className="h-3 w-3" />
           </Link>
         </div>
@@ -111,12 +142,23 @@ function AdminLayout() {
         <Watermark />
         <div className="flex items-center justify-between border-b border-border bg-sidebar p-3 text-sidebar-foreground md:hidden">
           <div className="flex items-center gap-2">
-            <img src={crest} alt="" width={28} height={28} className="rounded-md bg-white object-contain p-0.5" />
+            <img
+              src={crest}
+              alt=""
+              width={28}
+              height={28}
+              className="rounded-md bg-white object-contain p-0.5"
+            />
             <div className="text-sm font-semibold">Ngwathe Admin</div>
           </div>
           <div className="flex flex-wrap justify-end gap-1">
             {visible.map((n) => (
-              <Link key={n.to} to={n.to} className="rounded-md p-2 text-sidebar-foreground/80 hover:bg-sidebar-accent" title={n.label}>
+              <Link
+                key={n.to}
+                to={n.to}
+                className="rounded-md p-2 text-sidebar-foreground/80 hover:bg-sidebar-accent"
+                title={n.label}
+              >
                 <n.icon className="h-4 w-4" />
               </Link>
             ))}
@@ -139,10 +181,13 @@ function NoAccess({ email }: { email: string | null }) {
   return (
     <div className="mx-auto max-w-lg p-10 text-center">
       <ShieldAlert className="mx-auto h-10 w-10 text-warning-foreground" />
-      <h1 className="mt-3 font-display text-xl font-bold text-foreground">Awaiting role assignment</h1>
+      <h1 className="mt-3 font-display text-xl font-bold text-foreground">
+        Awaiting role assignment
+      </h1>
       <p className="mt-2 text-sm text-muted-foreground">
-        Your account{email ? ` (${email})` : ""} is registered but has no municipal role yet. An administrator must grant you
-        switchboard, supervisor or technician access before any complaint or job card data becomes visible.
+        Your account{email ? ` (${email})` : ""} is registered but has no municipal role yet. An
+        administrator must grant you switchboard, supervisor or technician access before any
+        complaint or job card data becomes visible.
       </p>
     </div>
   );

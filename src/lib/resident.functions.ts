@@ -15,7 +15,9 @@ const SAFE_JOB =
   "id, job_number, complaint_id, status, department, priority, title, work_description, location_text, dispatched_at, accepted_at, started_at, due_at, completed_at, completion_notes, outcome, complaint_received_at, created_at, personnel:assigned_to(full_name, department)";
 
 export const listMyReports = createServerFn({ method: "POST" })
-  .validator((d: unknown) => z.object({ references: z.array(z.string().min(4).max(40)).max(50) }).parse(d))
+  .validator((d: unknown) =>
+    z.object({ references: z.array(z.string().min(4).max(40)).max(50) }).parse(d),
+  )
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const db = context.supabase;

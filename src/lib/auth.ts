@@ -61,8 +61,16 @@ export function useStaff() {
     queryFn: async (): Promise<StaffIdentity> => {
       const [rolesRes, profileRes, personRes] = await Promise.all([
         supabase.from("user_roles").select("role").eq("user_id", userId!),
-        supabase.from("profiles").select("full_name, department, email").eq("user_id", userId!).maybeSingle(),
-        supabase.from("personnel").select("id, full_name, department").eq("user_id", userId!).maybeSingle(),
+        supabase
+          .from("profiles")
+          .select("full_name, department, email")
+          .eq("user_id", userId!)
+          .maybeSingle(),
+        supabase
+          .from("personnel")
+          .select("id, full_name, department")
+          .eq("user_id", userId!)
+          .maybeSingle(),
       ]);
 
       if (rolesRes.error) throw rolesRes.error;
@@ -73,7 +81,11 @@ export function useStaff() {
       return {
         userId: userId!,
         email: session?.user.email ?? profileRes.data?.email ?? null,
-        fullName: personRes.data?.full_name || profileRes.data?.full_name || session?.user.email || "Staff member",
+        fullName:
+          personRes.data?.full_name ||
+          profileRes.data?.full_name ||
+          session?.user.email ||
+          "Staff member",
         roles,
         department: personRes.data?.department ?? profileRes.data?.department ?? null,
         personnelId: personRes.data?.id ?? null,

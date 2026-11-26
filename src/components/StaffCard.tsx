@@ -14,16 +14,24 @@ export function StaffCard() {
       </div>
       <div className="truncate text-sm font-medium text-sidebar-foreground">{staff.fullName}</div>
       <div className="truncate text-[11px] text-sidebar-foreground/70">
-        {staff.roles.length ? staff.roles.map((r) => roleLabel[r as AppRole]).join(" · ") : "No role assigned"}
+        {staff.roles.length
+          ? staff.roles.map((r) => roleLabel[r as AppRole]).join(" · ")
+          : "No role assigned"}
         {staff.department ? ` · ${staff.department}` : ""}
       </div>
       <div className="mt-2 flex items-center justify-between gap-2">
         {staff.isAdmin && (
-          <Link to="/admin/access" className="text-[11px] font-medium text-sidebar-foreground/80 hover:underline">
+          <Link
+            to="/admin/access"
+            className="text-[11px] font-medium text-sidebar-foreground/80 hover:underline"
+          >
             Manage access
           </Link>
         )}
-        <button onClick={signOut} className="ml-auto inline-flex items-center gap-1 text-[11px] font-medium text-sidebar-foreground/80 hover:underline">
+        <button
+          onClick={signOut}
+          className="ml-auto inline-flex items-center gap-1 text-[11px] font-medium text-sidebar-foreground/80 hover:underline"
+        >
           <LogOut className="h-3 w-3" /> Sign out
         </button>
       </div>

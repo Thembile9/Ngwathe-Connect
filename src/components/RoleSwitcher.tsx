@@ -8,14 +8,26 @@ export function RoleSwitcher() {
   const [user, setUser] = useDemoUser();
   const { data: people = [] } = useQuery({
     queryKey: ["personnel", "active"],
-    queryFn: async () => (await supabase.from("personnel").select("id, full_name, department, role").eq("active", true).order("full_name")).data ?? [],
+    queryFn: async () =>
+      (
+        await supabase
+          .from("personnel")
+          .select("id, full_name, department, role")
+          .eq("active", true)
+          .order("full_name")
+      ).data ?? [],
   });
 
   const value = user.personnelId ?? "switchboard";
 
   function change(v: string) {
     if (v === "switchboard") {
-      setUser({ role: "switchboard", personnelId: null, name: "Switchboard Operator", department: "Switchboard" });
+      setUser({
+        role: "switchboard",
+        personnelId: null,
+        name: "Switchboard Operator",
+        department: "Switchboard",
+      });
       return;
     }
     const p = people.find((x) => x.id === v);
@@ -40,9 +52,13 @@ export function RoleSwitcher() {
         className="w-full rounded-md border border-sidebar-border bg-sidebar px-2 py-1.5 text-xs text-sidebar-foreground"
       >
         <option value="switchboard">Switchboard Operator</option>
-        {people.filter((p) => p.role !== "switchboard").map((p) => (
-          <option key={p.id} value={p.id}>{p.full_name} · {p.department}</option>
-        ))}
+        {people
+          .filter((p) => p.role !== "switchboard")
+          .map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.full_name} · {p.department}
+            </option>
+          ))}
       </select>
     </div>
   );

@@ -6,14 +6,21 @@ export function AppFooter() {
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 md:grid-cols-4">
         <div className="col-span-2">
           <div className="flex items-center gap-3">
-            <img src={crest} alt="" width={48} height={48} className="rounded-md bg-white object-contain p-0.5" />
+            <img
+              src={crest}
+              alt=""
+              width={48}
+              height={48}
+              className="rounded-md bg-white object-contain p-0.5"
+            />
             <div>
               <div className="font-display text-lg font-semibold">Ngwathe Local Municipality</div>
               <div className="text-xs text-primary-foreground/70">Progress Through Unity</div>
             </div>
           </div>
           <p className="mt-3 max-w-md text-sm text-primary-foreground/80">
-            Serving the communities of Parys, Vredefort, Heilbron, Koppies, Edenville and surrounding areas.
+            Serving the communities of Parys, Vredefort, Heilbron, Koppies, Edenville and
+            surrounding areas.
           </p>
         </div>
         <div>
@@ -35,7 +42,8 @@ export function AppFooter() {
         </div>
       </div>
       <div className="border-t border-white/10 py-4 text-center text-xs text-primary-foreground/60">
-        © {new Date().getFullYear()} Ngwathe Local Municipality. Powered by AI service delivery platform.
+        © {new Date().getFullYear()} Ngwathe Local Municipality. Powered by AI service delivery
+        platform.
       </div>
     </footer>
   );

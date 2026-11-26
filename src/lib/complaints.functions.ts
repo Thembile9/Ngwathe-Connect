@@ -62,7 +62,11 @@ export const submitComplaint = createServerFn({ method: "POST" })
     // Resolve category / subcategory / ward / town ids
     const [catRes, wardRes, townRes] = await Promise.all([
       data.category_slug
-        ? supabase.from("categories").select("id, name").eq("slug", data.category_slug).maybeSingle()
+        ? supabase
+            .from("categories")
+            .select("id, name")
+            .eq("slug", data.category_slug)
+            .maybeSingle()
         : Promise.resolve({ data: null, error: null }),
       data.ward_number
         ? supabase.from("wards").select("id").eq("ward_number", data.ward_number).maybeSingle()
@@ -136,7 +140,7 @@ export const trackComplaint = createServerFn({ method: "GET" })
     const { data: c } = await supabase
       .from("complaints")
       .select(
-        "id, reference, description, ai_summary, priority, status, assigned_department, assigned_official, resident_name, street_address, created_at, updated_at, resolved_at, categories(name, department, color, icon), subcategories(name), wards(ward_number, name), towns(name)"
+        "id, reference, description, ai_summary, priority, status, assigned_department, assigned_official, resident_name, street_address, created_at, updated_at, resolved_at, categories(name, department, color, icon), subcategories(name), wards(ward_number, name), towns(name)",
       )
       .eq("resident_user_id", context.userId)
       .eq("reference", data.reference.toUpperCase().trim())
@@ -155,13 +159,21 @@ export const updateComplaintStatus = createServerFn({ method: "POST" })
     z
       .object({
         id: z.string().uuid(),
-        status: z.enum(["new", "acknowledged", "assigned", "in_progress", "on_hold", "resolved", "closed"]),
+        status: z.enum([
+          "new",
+          "acknowledged",
+          "assigned",
+          "in_progress",
+          "on_hold",
+          "resolved",
+          "closed",
+        ]),
         note: z.string().max(1000).optional(),
         assigned_department: z.string().max(200).optional(),
         assigned_official: z.string().max(200).optional(),
         actor: z.string().max(120).optional(),
       })
-      .parse(data)
+      .parse(data),
   )
   .middleware([requireSupabaseAuth])
   .handler(async ({ data, context }) => {
@@ -174,7 +186,8 @@ export const updateComplaintStatus = createServerFn({ method: "POST" })
     } = { status: data.status };
     if (data.assigned_department) patch.assigned_department = data.assigned_department;
     if (data.assigned_official) patch.assigned_official = data.assigned_official;
-    if (data.status === "resolved" || data.status === "closed") patch.resolved_at = new Date().toISOString();
+    if (data.status === "resolved" || data.status === "closed")
+      patch.resolved_at = new Date().toISOString();
 
     const { error } = await supabase.from("complaints").update(patch).eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -191,7 +204,13 @@ export const updateComplaintStatus = createServerFn({ method: "POST" })
 
 export const addComplaintNote = createServerFn({ method: "POST" })
   .validator((data: unknown) =>
-    z.object({ id: z.string().uuid(), note: z.string().min(1).max(2000), actor: z.string().max(120).optional() }).parse(data)
+    z
+      .object({
+        id: z.string().uuid(),
+        note: z.string().min(1).max(2000),
+        actor: z.string().max(120).optional(),
+      })
+      .parse(data),
   )
   .middleware([requireSupabaseAuth])
   .handler(async ({ data, context }) => {

@@ -1,14 +1,27 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, PieChart, Pie, Cell, Legend } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  Tooltip,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from "recharts";
 
 const analyticsQuery = {
   queryKey: ["admin", "analytics"],
   queryFn: async () => {
     const { data } = await supabase
       .from("complaints")
-      .select("id, priority, status, created_at, resolved_at, assigned_department, categories(name, color), wards(ward_number)")
+      .select(
+        "id, priority, status, created_at, resolved_at, assigned_department, categories(name, color), wards(ward_number)",
+      )
       .limit(2000);
     return data ?? [];
   },
@@ -17,7 +30,11 @@ const analyticsQuery = {
 export const Route = createFileRoute("/admin/analytics")({
   loader: ({ context }) => context.queryClient.ensureQueryData(analyticsQuery),
   component: AnalyticsPage,
-  errorComponent: ({ error }) => <div className="p-8 text-destructive">{error instanceof Error ? error.message : String(error)}</div>,
+  errorComponent: ({ error }) => (
+    <div className="p-8 text-destructive">
+      {error instanceof Error ? error.message : String(error)}
+    </div>
+  ),
   notFoundComponent: () => <div className="p-8">Not found</div>,
 });
 
@@ -29,7 +46,7 @@ function AnalyticsPage() {
       const name = c.categories?.name ?? "Other";
       acc[name] = { count: (acc[name]?.count ?? 0) + 1, color: c.categories?.color ?? "#888" };
       return acc;
-    }, {})
+    }, {}),
   ).map(([name, v]) => ({ name, value: v.count, color: v.color }));
 
   const byWard = Object.entries(
@@ -38,7 +55,7 @@ function AnalyticsPage() {
       const k = `W${c.wards.ward_number}`;
       acc[k] = (acc[k] ?? 0) + 1;
       return acc;
-    }, {})
+    }, {}),
   )
     .map(([name, value]) => ({ name, value }))
     .sort((a, b) => Number(a.name.slice(1)) - Number(b.name.slice(1)));
@@ -49,7 +66,9 @@ function AnalyticsPage() {
   }));
 
   const byDept = Object.entries(
-    data.reduce<Record<string, { total: number; resolved: number; sumTime: number; resolvedCount: number }>>((acc, c) => {
+    data.reduce<
+      Record<string, { total: number; resolved: number; sumTime: number; resolvedCount: number }>
+    >((acc, c) => {
       const k = c.assigned_department ?? "Unassigned";
       const cur = acc[k] ?? { total: 0, resolved: 0, sumTime: 0, resolvedCount: 0 };
       cur.total += 1;
@@ -60,7 +79,7 @@ function AnalyticsPage() {
       }
       acc[k] = cur;
       return acc;
-    }, {})
+    }, {}),
   ).map(([name, v]) => ({
     name,
     total: v.total,
@@ -73,15 +92,26 @@ function AnalyticsPage() {
     <div className="mx-auto max-w-7xl space-y-6 p-6">
       <header>
         <h1 className="font-display text-3xl font-bold text-foreground">Analytics</h1>
-        <p className="text-sm text-muted-foreground">Executive reporting on service delivery performance.</p>
+        <p className="text-sm text-muted-foreground">
+          Executive reporting on service delivery performance.
+        </p>
       </header>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card title="Complaints by category">
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
-              <Pie data={byCategory} dataKey="value" nameKey="name" innerRadius={50} outerRadius={100} paddingAngle={2}>
-                {byCategory.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+              <Pie
+                data={byCategory}
+                dataKey="value"
+                nameKey="name"
+                innerRadius={50}
+                outerRadius={100}
+                paddingAngle={2}
+              >
+                {byCategory.map((entry, i) => (
+                  <Cell key={i} fill={entry.color} />
+                ))}
               </Pie>
               <Tooltip />
               <Legend wrapperStyle={{ fontSize: 11 }} />
@@ -131,7 +161,9 @@ function AnalyticsPage() {
                     <td className="py-2 text-right">{d.resolved}</td>
                     <td className="py-2 text-right">{d.avg_hrs || "—"}</td>
                     <td className="py-2 text-right">
-                      <span className={`rounded px-2 py-0.5 text-xs font-semibold ${d.resolution_rate >= 60 ? "bg-success/15 text-success" : d.resolution_rate >= 30 ? "bg-warning/20 text-warning-foreground" : "bg-destructive/15 text-destructive"}`}>
+                      <span
+                        className={`rounded px-2 py-0.5 text-xs font-semibold ${d.resolution_rate >= 60 ? "bg-success/15 text-success" : d.resolution_rate >= 30 ? "bg-warning/20 text-warning-foreground" : "bg-destructive/15 text-destructive"}`}
+                      >
                         {d.resolution_rate}%
                       </span>
                     </td>

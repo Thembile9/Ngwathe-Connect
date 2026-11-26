@@ -6,7 +6,10 @@ import crest from "@/assets/logo";
  */
 export function Watermark({ className = "" }: { className?: string }) {
   return (
-    <div aria-hidden className={`pointer-events-none absolute inset-0 -z-10 overflow-hidden ${className}`}>
+    <div
+      aria-hidden
+      className={`pointer-events-none absolute inset-0 -z-10 overflow-hidden ${className}`}
+    >
       <img
         src={crest}
         alt=""

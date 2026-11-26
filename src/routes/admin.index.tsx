@@ -4,13 +4,28 @@ import { supabase } from "@/integrations/supabase/client";
 import { priorityStyles, statusLabel, statusStyles } from "@/lib/format";
 import { TimeAgo } from "@/components/TimeAgo";
 import { AlertTriangle, CheckCircle2, ListChecks, Clock, TrendingUp } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, LineChart, Line, CartesianGrid } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  Tooltip,
+  LineChart,
+  Line,
+  CartesianGrid,
+} from "recharts";
 
 const overviewQuery = {
   queryKey: ["admin", "overview"],
   queryFn: async () => {
     const [all, categories] = await Promise.all([
-      supabase.from("complaints").select("id, status, priority, assigned_department, created_at, resolved_at, reference, description, categories(name, color), wards(ward_number)").order("created_at", { ascending: false }),
+      supabase
+        .from("complaints")
+        .select(
+          "id, status, priority, assigned_department, created_at, resolved_at, reference, description, categories(name, color), wards(ward_number)",
+        )
+        .order("created_at", { ascending: false }),
       supabase.from("categories").select("slug, name, color, department"),
     ]);
     return { complaints: all.data ?? [], categories: categories.data ?? [] };
@@ -20,7 +35,11 @@ const overviewQuery = {
 export const Route = createFileRoute("/admin/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(overviewQuery),
   component: AdminOverview,
-  errorComponent: ({ error }) => <div className="p-8 text-destructive">{error instanceof Error ? error.message : String(error)}</div>,
+  errorComponent: ({ error }) => (
+    <div className="p-8 text-destructive">
+      {error instanceof Error ? error.message : String(error)}
+    </div>
+  ),
   notFoundComponent: () => <div className="p-8">Not found</div>,
 });
 
@@ -29,13 +48,18 @@ function AdminOverview() {
   const total = data.complaints.length;
   const open = data.complaints.filter((c) => !["resolved", "closed"].includes(c.status)).length;
   const closed = data.complaints.filter((c) => ["resolved", "closed"].includes(c.status)).length;
-  const critical = data.complaints.filter((c) => c.priority === "critical" && !["resolved", "closed"].includes(c.status)).length;
+  const critical = data.complaints.filter(
+    (c) => c.priority === "critical" && !["resolved", "closed"].includes(c.status),
+  ).length;
 
   const resolvedWithTime = data.complaints.filter((c) => c.resolved_at);
   const avgResolutionHrs =
     resolvedWithTime.length === 0
       ? 0
-      : resolvedWithTime.reduce((sum, c) => sum + (new Date(c.resolved_at!).getTime() - new Date(c.created_at).getTime()), 0) /
+      : resolvedWithTime.reduce(
+          (sum, c) => sum + (new Date(c.resolved_at!).getTime() - new Date(c.created_at).getTime()),
+          0,
+        ) /
         resolvedWithTime.length /
         3_600_000;
 
@@ -45,7 +69,7 @@ function AdminOverview() {
       const d = c.assigned_department ?? "Unassigned";
       acc[d] = (acc[d] ?? 0) + 1;
       return acc;
-    }, {})
+    }, {}),
   ).map(([name, value]) => ({ name, value }));
 
   // Complaints by day (last 14 days)
@@ -69,25 +93,43 @@ function AdminOverview() {
     <div className="mx-auto max-w-7xl space-y-6 p-6">
       <header>
         <h1 className="font-display text-3xl font-bold text-foreground">Overview</h1>
-        <p className="text-sm text-muted-foreground">Real-time view of service delivery across Ngwathe.</p>
+        <p className="text-sm text-muted-foreground">
+          Real-time view of service delivery across Ngwathe.
+        </p>
       </header>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Total complaints" value={total} icon={ListChecks} tone="primary" />
         <StatCard label="Open cases" value={open} icon={Clock} tone="warning" />
         <StatCard label="Critical open" value={critical} icon={AlertTriangle} tone="destructive" />
-        <StatCard label="Resolved" value={closed} icon={CheckCircle2} tone="success" sub={`Avg ${avgResolutionHrs.toFixed(1)}h`} />
+        <StatCard
+          label="Resolved"
+          value={closed}
+          icon={CheckCircle2}
+          tone="success"
+          sub={`Avg ${avgResolutionHrs.toFixed(1)}h`}
+        />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <ChartCard title="Complaints trend — last 14 days" icon={TrendingUp} className="lg:col-span-2">
+        <ChartCard
+          title="Complaints trend — last 14 days"
+          icon={TrendingUp}
+          className="lg:col-span-2"
+        >
           <ResponsiveContainer width="100%" height={260}>
             <LineChart data={byDay}>
               <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.9 0.015 240)" />
               <XAxis dataKey="date" fontSize={11} />
               <YAxis fontSize={11} allowDecimals={false} />
               <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12 }} />
-              <Line type="monotone" dataKey="value" stroke="oklch(0.28 0.12 260)" strokeWidth={2} dot={{ r: 3 }} />
+              <Line
+                type="monotone"
+                dataKey="value"
+                stroke="oklch(0.28 0.12 260)"
+                strokeWidth={2}
+                dot={{ r: 3 }}
+              />
             </LineChart>
           </ResponsiveContainer>
         </ChartCard>
@@ -106,24 +148,44 @@ function AdminOverview() {
       <section className="rounded-xl border border-border bg-card shadow-card">
         <div className="flex items-center justify-between border-b border-border p-4">
           <h2 className="font-semibold text-foreground">Recent complaints</h2>
-          <Link to="/admin/complaints" className="text-sm font-medium text-primary hover:underline">View all →</Link>
+          <Link to="/admin/complaints" className="text-sm font-medium text-primary hover:underline">
+            View all →
+          </Link>
         </div>
         <div className="divide-y divide-border">
           {recent.map((c) => (
-            <Link key={c.id} to="/admin/complaints/$id" params={{ id: c.id }} className="flex items-start justify-between gap-4 p-4 hover:bg-accent">
+            <Link
+              key={c.id}
+              to="/admin/complaints/$id"
+              params={{ id: c.id }}
+              className="flex items-start justify-between gap-4 p-4 hover:bg-accent"
+            >
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-xs text-muted-foreground">{c.reference}</span>
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${priorityStyles[c.priority]}`}>{c.priority}</span>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${priorityStyles[c.priority]}`}
+                  >
+                    {c.priority}
+                  </span>
                 </div>
                 <div className="mt-1 text-sm font-medium text-foreground">
-                  {c.categories?.name ?? "Complaint"} {c.wards ? `· Ward ${c.wards.ward_number}` : ""}
+                  {c.categories?.name ?? "Complaint"}{" "}
+                  {c.wards ? `· Ward ${c.wards.ward_number}` : ""}
                 </div>
-                <div className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{c.description}</div>
+                <div className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
+                  {c.description}
+                </div>
               </div>
               <div className="flex flex-col items-end gap-1">
-                <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${statusStyles[c.status]}`}>{statusLabel(c.status)}</span>
-                <span className="text-[10px] text-muted-foreground">{<TimeAgo value={c.created_at} />}</span>
+                <span
+                  className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${statusStyles[c.status]}`}
+                >
+                  {statusLabel(c.status)}
+                </span>
+                <span className="text-[10px] text-muted-foreground">
+                  {<TimeAgo value={c.created_at} />}
+                </span>
               </div>
             </Link>
           ))}
@@ -134,8 +196,18 @@ function AdminOverview() {
 }
 
 function StatCard({
-  label, value, icon: Icon, tone, sub,
-}: { label: string; value: number; icon: React.ComponentType<{ className?: string }>; tone: "primary" | "warning" | "destructive" | "success"; sub?: string }) {
+  label,
+  value,
+  icon: Icon,
+  tone,
+  sub,
+}: {
+  label: string;
+  value: number;
+  icon: React.ComponentType<{ className?: string }>;
+  tone: "primary" | "warning" | "destructive" | "success";
+  sub?: string;
+}) {
   const toneMap = {
     primary: "bg-primary/10 text-primary",
     warning: "bg-warning/20 text-warning-foreground",
@@ -156,7 +228,17 @@ function StatCard({
   );
 }
 
-function ChartCard({ title, children, icon: Icon, className = "" }: { title: string; children: React.ReactNode; icon?: React.ComponentType<{ className?: string }>; className?: string }) {
+function ChartCard({
+  title,
+  children,
+  icon: Icon,
+  className = "",
+}: {
+  title: string;
+  children: React.ReactNode;
+  icon?: React.ComponentType<{ className?: string }>;
+  className?: string;
+}) {
   return (
     <div className={`rounded-xl border border-border bg-card p-4 shadow-card ${className}`}>
       <div className="mb-3 flex items-center gap-2">
