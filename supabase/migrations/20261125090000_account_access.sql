@@ -1,0 +1,23 @@
+-- Apply before running the updated application. Existing reports remain unclaimed.
+begin;
+alter table public.complaints add column if not exists resident_user_id uuid references auth.users(id) on delete set null;
+create index if not exists complaints_resident_user_idx on public.complaints(resident_user_id);
+revoke execute on function public.claim_bootstrap_admin() from public, anon, authenticated;
+drop policy if exists "Residents may log complaints" on public.complaints;
+create policy "Account complaint intake" on public.complaints for insert to authenticated with check (resident_user_id = auth.uid() and status = 'new' and channel = 'web' and assigned_official is null);
+create policy "Residents read own complaints" on public.complaints for select to authenticated using (resident_user_id = auth.uid());
+drop policy if exists "Log complaint events" on public.complaint_events;
+create policy "Account complaint event intake" on public.complaint_events for insert to authenticated with check (exists (select 1 from public.complaints c where c.id = complaint_id and (public.is_staff(auth.uid()) or (c.resident_user_id = auth.uid() and event_type = 'created'))));
+create or replace function public.owns_complaint(_id uuid) returns boolean language sql stable security definer set search_path = public as $$ select exists(select 1 from public.complaints where id = _id and resident_user_id = auth.uid()) $$;
+revoke all on function public.owns_complaint(uuid) from public, anon;
+grant execute on function public.owns_complaint(uuid) to authenticated;
+create policy "Residents read own complaint events" on public.complaint_events for select to authenticated using (public.owns_complaint(complaint_id));
+create policy "Residents read own jobs" on public.job_cards for select to authenticated using (public.owns_complaint(complaint_id));
+create policy "Residents read own job events" on public.job_card_events for select to authenticated using (exists (select 1 from public.job_cards j join public.complaints c on c.id = j.complaint_id where j.id = job_card_id and c.resident_user_id = auth.uid()));
+drop policy if exists "Staff log job events" on public.job_card_events;
+create policy "Staff log job events" on public.job_card_events for insert to authenticated with check (public.is_staff(auth.uid()) and exists (select 1 from public.job_cards j where j.id = job_card_id));
+create or replace function public.current_department() returns text language sql stable security definer set search_path = public as $$ select department from public.personnel where user_id = auth.uid() limit 1 $$;
+create or replace function public.create_account_profile() returns trigger language plpgsql security definer set search_path = public as $$ begin insert into public.profiles(user_id, full_name, email) values (new.id, coalesce(new.raw_user_meta_data->>'full_name', new.email, 'Resident'), new.email) on conflict (user_id) do nothing; return new; end; $$;
+drop trigger if exists ngwathe_account_profile on auth.users;
+create trigger ngwathe_account_profile after insert on auth.users for each row execute function public.create_account_profile();
+commit;
