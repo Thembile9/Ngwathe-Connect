@@ -14,14 +14,13 @@ Published URLs:
 
 ## Self-hosting from GitHub
 
-Any host that can run a Node/edge SSR build works. Cloudflare Workers/Pages is the
-tested target.
+Any host that can run a Node/edge SSR build works. Cloudflare Workers/Pages is the original configured target; validate deployment before production.
 
 ```
-Install command:  bun install     (or npm ci)
+Install command:  bun install     (or npm install)
 Build command:    bun run build   (or npm run build)
 Output:           .output/        (Nitro server build)
-Node version:     20 (see .nvmrc)
+Node version:     22.12+ (see .nvmrc)
 ```
 
 ### Steps
@@ -52,7 +51,7 @@ SUPABASE_PROJECT_ID
 LOVABLE_API_KEY
 ```
 
-Optional WhatsApp channel: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM`.
+Optional Meta WhatsApp channel: `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_APP_SECRET`, `WHATSAPP_VERIFY_TOKEN`.
 
 ## Database
 
