@@ -19,7 +19,7 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useMyReports } from "@/lib/demo-session";
+import { useMyReports } from "@/lib/resident-reports";
 import { InstallAppCard } from "@/components/InstallAppCard";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {

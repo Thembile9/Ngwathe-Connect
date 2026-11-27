@@ -58,11 +58,13 @@ function Switchboard() {
   const { data } = useSuspenseQuery(switchboardQuery);
   const [dispatching, setDispatching] = useState<Complaint | null>(null);
 
+  const { jobs } = data;
+
   const jobByComplaint = useMemo(() => {
-    const m = new Map<string, (typeof data.jobs)[number]>();
-    data.jobs.forEach((j) => j.complaint_id && m.set(j.complaint_id, j));
+    const m = new Map<string, (typeof jobs)[number]>();
+    jobs.forEach((j) => j.complaint_id && m.set(j.complaint_id, j));
     return m;
-  }, [data.jobs]);
+  }, [jobs]);
 
   const pending = data.complaints.filter((c) => !jobByComplaint.has(c.id));
   const dispatched = data.complaints.filter((c) => jobByComplaint.has(c.id));
