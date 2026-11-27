@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useMyReports } from "@/lib/demo-session";
+import { useMyReports } from "@/lib/resident-reports";
 import { formatDate, statusLabel, statusStyles, timeAgo } from "@/lib/format";
 import { duration, jobStatusLabel, jobStatusStyles } from "@/lib/jobs";
 import { ClipboardList, HardHat } from "lucide-react";
